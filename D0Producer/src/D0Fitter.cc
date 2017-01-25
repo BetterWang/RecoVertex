@@ -83,7 +83,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   tkChi2Cut = theParameters.getParameter<double>(string("tkChi2Cut"));
   tkNhitsCut = theParameters.getParameter<int>(string("tkNhitsCut"));
   tkPtCut = theParameters.getParameter<double>(string("tkPtCut"));
-  tkEtaCut = theParameters.getParameter<double>)(string("tkEtaCut"));
+  tkEtaCut = theParameters.getParameter<double>(string("tkEtaCut"));
   chi2Cut = theParameters.getParameter<double>(string("vtxChi2Cut"));
   rVtxCut = theParameters.getParameter<double>(string("rVtxCut"));
   rVtxSigCut = theParameters.getParameter<double>(string("vtxSignificance2DCut"));
