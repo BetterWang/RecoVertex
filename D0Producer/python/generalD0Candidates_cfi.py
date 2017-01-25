@@ -6,7 +6,7 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     trackRecoAlgorithm = cms.InputTag('generalTracks'),
     vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices'),
 
-    trackQualities = cms.vstring('loose'),
+    trackQualities = cms.vstring('highPurity'),
                                      
     tkChi2Cut = cms.double(9999.0), #trk Chi2 <
     tkNhitsCut = cms.int32(0), #trk Nhits >=
@@ -20,7 +20,7 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     #   PCA distance between tracks <
     tkDCACut = cms.double(9999.),
     vtxChi2Cut = cms.double(9999.0), #vtxChi2 <
-    VtxChiProbCut = cms.double(0.001), #vtx prob >
+    VtxChiProbCut = cms.double(0.0001), #vtx prob >
     collinearityCut = cms.double(-2.0), #cos(pointAngle) >
     alphaCut = cms.double(999.0), #pointAngle <
     rVtxCut = cms.double(0.0),
