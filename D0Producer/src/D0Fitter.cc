@@ -82,6 +82,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   tkChi2Cut = theParameters.getParameter<double>(string("tkChi2Cut"));
   tkNhitsCut = theParameters.getParameter<int>(string("tkNhitsCut"));
   tkPtCut = theParameters.getParameter<double>(string("tkPtCut"));
+  tkEtaCut = theParameters.getParameter<double>)(string("tkEtaCut"));
   chi2Cut = theParameters.getParameter<double>(string("vtxChi2Cut"));
   rVtxCut = theParameters.getParameter<double>(string("rVtxCut"));
   rVtxSigCut = theParameters.getParameter<double>(string("vtxSignificance2DCut"));
@@ -91,6 +92,9 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   d0MassCut = theParameters.getParameter<double>(string("d0MassCut"));
   dauTransImpactSigCut = theParameters.getParameter<double>(string("dauTransImpactSigCut"));
   dauLongImpactSigCut = theParameters.getParameter<double>(string("dauLongImpactSigCut"));
+  VtxChiProbCut = theParameters.getParameter<double>(string("VtxChiProbCut"));
+  dPtCut = theParameters.getParameter<double>(string("dPtCut"));
+  alphaCut = theParameters.getParameter<double>(string("alphaCut"));
 
   std::vector<std::string> qual = theParameters.getParameter<std::vector<std::string> >("trackQualities");
   for (unsigned int ndx = 0; ndx < qual.size(); ndx++) {
@@ -181,7 +185,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
     if( tmpRef->normalizedChi2() < tkChi2Cut &&
         tmpRef->numberOfValidHits() >= tkNhitsCut &&
-        tmpRef->pt() > tkPtCut ) {
+        tmpRef->pt() > tkPtCut && fabs(tmpRef->eta()) < tkEtaCut ) {
 //      TransientTrack tmpTk( *tmpRef, &(*bFieldHandle), globTkGeomHandle );
       TransientTrack tmpTk( *tmpRef, magField );
 
@@ -293,13 +297,16 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         RefCountedKinematicVertex d0DecayVertex = d0Vertex->currentDecayVertex();
         if (!d0DecayVertex->vertexIsValid()) continue;
 
-        if ( d0DecayVertex->chiSquared()<0 || d0DecayVertex->chiSquared()>1000 ) continue;
+        //if ( d0DecayVertex->chiSquared()<0 || d0DecayVertex->chiSquared()>1000 ) continue;
 
-        float d0C2Prob =
-           ChiSquaredProbability((double)(d0DecayVertex->chiSquared()),(double)(d0DecayVertex->degreesOfFreedom()));
-        if (d0C2Prob < 0.0001) continue;
+        //float d0C2Prob =
+        //   ChiSquaredProbability((double)(d0DecayVertex->chiSquared()),(double)(d0DecayVertex->degreesOfFreedom()));
+        //if (d0C2Prob < 0.0001) continue;
 
-        if ( d0Cand->currentState().mass() > 2.5 || d0Cand->currentState().mass() < 1.0) continue;
+	float d0C2Prob = TMath::Prob(d0DecayVertex->chiSquared(),d0DecayVertex->degreesOfFreedom());
+	if (d0C2Prob < VtxChiProbCut) continue;
+
+        //if ( d0Cand->currentState().mass() > 2.5 || d0Cand->currentState().mass() < 1.0) continue;
 
         d0Vertex->movePointerToTheFirstChild();
         RefCountedKinematicParticle posCand = d0Vertex->currentParticle();
@@ -367,7 +374,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             rVtxMag / sigmaRvtxMag < rVtxSigCut ||
             lVtxMag < lVtxCut ||
             lVtxMag / sigmaLvtxMag < lVtxSigCut ||
-            cos(d0Angle) < collinCut
+            cos(d0Angle) < collinCut || d0Angle > alphaCut
         ) continue;
 
         VertexCompositeCandidate* theD0 = 0;
@@ -391,7 +398,8 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         theD0->setPdgId(pdg_id[i]);
         addp4.set( *theD0 );
         if( theD0->mass() < d0Mass + d0MassCut &&
-            theD0->mass() > d0Mass - d0MassCut ) {
+            theD0->mass() > d0Mass - d0MassCut &&
+	    theD0->pt() > dPtCut ) {
           theD0s.push_back( *theD0 );
         }
 

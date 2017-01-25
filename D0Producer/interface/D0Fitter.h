@@ -97,6 +97,7 @@ class D0Fitter {
   double tkChi2Cut;
   int    tkNhitsCut;
   double tkPtCut;
+  double tkEtaCut;
   double chi2Cut;
   double rVtxCut;
   double rVtxSigCut;
@@ -106,6 +107,9 @@ class D0Fitter {
   double d0MassCut;
   double dauTransImpactSigCut;
   double dauLongImpactSigCut;
+  double VtxChiProbCut;
+  double dPtCut;
+  double alphaCut;
 
   std::vector<reco::TrackBase::TrackQuality> qualities;
 };
