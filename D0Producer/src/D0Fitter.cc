@@ -261,11 +261,11 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       cApp.calculate(posState, negState);
       if( !cApp.status() ) continue;
       float dca = fabs( cApp.distance() );
-      GlobalPoint cxPt = cApp.crossingPoint();
+//      GlobalPoint cxPt = cApp.crossingPoint();
 
       if (dca < 0. || dca > tkDCACut) continue;
-      if (sqrt( cxPt.x()*cxPt.x() + cxPt.y()*cxPt.y() ) > 120. 
-          || std::abs(cxPt.z()) > 300.) continue;
+//      if (sqrt( cxPt.x()*cxPt.x() + cxPt.y()*cxPt.y() ) > 120. 
+//          || std::abs(cxPt.z()) > 300.) continue;
 
       // Create the vertex fitter object and vertex the tracks
     
