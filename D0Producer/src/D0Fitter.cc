@@ -377,7 +377,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
                          d0Vtx.z() - zVtx);
           TVector3 dVec;
           dVec.SetXYZ(d0TotalP.x(), d0TotalP.y(), d0TotalP.z());
-          alpha = svpvVec.Angle(dVec);
+          double alpha = svpvVec.Angle(dVec);
           
         if( d0NormalizedChi2 > chi2Cut ||
             rVtxMag < rVtxCut ||
