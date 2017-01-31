@@ -418,12 +418,12 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     }
   }
 }
-
-void D0Fitter::resetAll() {
-    theD0s.clear();
-}
 // Get methods
 
 const reco::VertexCompositeCandidateCollection& D0Fitter::getD0() const {
   return theD0s;
+}
+
+void D0Fitter::resetAll() {
+    theD0s.clear();
 }
