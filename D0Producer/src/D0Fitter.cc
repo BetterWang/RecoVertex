@@ -59,9 +59,9 @@ const float d0Mass = 1.86484;
 const float lambdaCMass = 2.28646;
 const float xiMass = 1.32171;
 const float omegaMass = 1.67245;
-float piMass_sigma = piMass*1.e-6;
-float protonMass_sigma = protonMass*1.e-6;
-float kaonMass_sigma = kaonMass*1.e-6;
+float piMass_sigma = 3.5E-7f;
+float protonMass_sigma = 8E-8f;
+float kaonMass_sigma = 1.6E-5f;
 float kShortMass_sigma = kShortMass*1.e-6;
 float lambdaMass_sigma = lambdaMass*1.e-6;
 float d0Mass_sigma = d0Mass*1.e-6;
@@ -419,6 +419,9 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   }
 }
 
+void D0Fitter::resetAll() {
+    theD0s.clear();
+}
 // Get methods
 
 const reco::VertexCompositeCandidateCollection& D0Fitter::getD0() const {
