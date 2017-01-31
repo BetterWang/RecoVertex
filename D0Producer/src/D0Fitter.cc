@@ -39,6 +39,7 @@
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
 #include <TMath.h>
+#include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 
@@ -370,12 +371,20 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         sigmaLvtxMag = sqrt(ROOT::Math::Similarity(d0TotalCov, distanceVector3D)) / lVtxMag;
         sigmaRvtxMag = sqrt(ROOT::Math::Similarity(d0TotalCov, distanceVector2D)) / rVtxMag;
 
+          TVector3 svpvVec;
+          svpvVec.SetXYZ(d0Vtx.x() - xVtx,
+                         d0Vtx.y() - yVtx,
+                         d0Vtx.z() - zVtx);
+          TVector3 dVec;
+          dVec.SetXYZ(d0TotalP.x(), d0TotalP.y(), d0TotalP.z());
+          alpha = svpvVec.Angle(dVec);
+          
         if( d0NormalizedChi2 > chi2Cut ||
             rVtxMag < rVtxCut ||
             rVtxMag / sigmaRvtxMag < rVtxSigCut ||
             lVtxMag < lVtxCut ||
             lVtxMag / sigmaLvtxMag < lVtxSigCut ||
-            cos(d0Angle) < collinCut || d0Angle > alphaCut
+            cos(d0Angle) < collinCut || alpha > alphaCut
         ) continue;
 
         VertexCompositeCandidate* theD0 = 0;
