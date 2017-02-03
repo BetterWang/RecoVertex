@@ -31,7 +31,7 @@
 #include "RecoVertex/KinematicFitPrimitives/interface/MultiTrackKinematicConstraint.h"
 #include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
 #include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
-#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+//#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
@@ -97,6 +97,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   VtxChiProbCut = theParameters.getParameter<double>(string("VtxChiProbCut"));
   dPtCut = theParameters.getParameter<double>(string("dPtCut"));
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
+  chargeOpt = theParameters.getParameter<int>(string("chargeOpt"));
 
   std::vector<std::string> qual = theParameters.getParameter<std::vector<std::string> >("trackQualities");
   for (unsigned int ndx = 0; ndx < qual.size(); ndx++) {
@@ -119,8 +120,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
   typedef ROOT::Math::SVector<double, 3> SVector3;
 
-  // Create std::vectors for Tracks and TrackRefs (required for
-  //  passing to the KalmanVertexFitter)
+  // Create std::vectors for Tracks and TrackRefs
   std::vector<TrackRef> theTrackRefs;
   std::vector<TransientTrack> theTransTracks;
 
@@ -132,9 +132,9 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
-  iEvent.getByToken(token_tracks, theTrackHandle); 
+  iEvent.getByToken(token_tracks, theTrackHandle);
   iEvent.getByToken(token_vertices, theVertexHandle);
-  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
+  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);
 
   if( !theTrackHandle->size() ) return;
   iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
@@ -179,7 +179,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
 	if (tmpRef->quality(qualities[ndx_])){
 	  quality_ok = true;
-	  break;          
+	  break;
 	}
       }
     }
@@ -193,7 +193,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
       math::XYZPoint bestvtx(xVtx,yVtx,zVtx);
       double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
+      double dxyvtx = tmpRef->dxy(bestvtx);
       double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
       double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
 
@@ -228,24 +228,57 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
       // Look at the two tracks we're looping over.  If they're oppositely
       //  charged, load them into the hypothesized positive and negative tracks
-      //  and references to be sent to the KalmanVertexFitter
-      if(theTrackRefs[trdx1]->charge() < 0. && 
-	 theTrackRefs[trdx2]->charge() > 0.) {
-	negativeTrackRef = theTrackRefs[trdx1];
-	positiveTrackRef = theTrackRefs[trdx2];
-	negTransTkPtr = &theTransTracks[trdx1];
-	posTransTkPtr = &theTransTracks[trdx2];
-      }
-      else if(theTrackRefs[trdx1]->charge() > 0. &&
-	      theTrackRefs[trdx2]->charge() < 0.) {
-	negativeTrackRef = theTrackRefs[trdx2];
-	positiveTrackRef = theTrackRefs[trdx1];
-	negTransTkPtr = &theTransTracks[trdx2];
-	posTransTkPtr = &theTransTracks[trdx1];
+      //  and references. If they have the same charges, switch on different combinations.
+      if ( chargeOpt == 0 ) {
+	      if(theTrackRefs[trdx1]->charge() < 0. && 
+			      theTrackRefs[trdx2]->charge() > 0.) {
+		      negativeTrackRef = theTrackRefs[trdx1];
+		      positiveTrackRef = theTrackRefs[trdx2];
+		      negTransTkPtr = &theTransTracks[trdx1];
+		      posTransTkPtr = &theTransTracks[trdx2];
+	      }
+	      else if(theTrackRefs[trdx1]->charge() > 0. &&
+			      theTrackRefs[trdx2]->charge() < 0.) {
+		      negativeTrackRef = theTrackRefs[trdx2];
+		      positiveTrackRef = theTrackRefs[trdx1];
+		      negTransTkPtr = &theTransTracks[trdx2];
+		      posTransTkPtr = &theTransTracks[trdx1];
+	      } esle continue;
+      } else if ( chargeOpt == 1 ) {
+	      if(theTrackRefs[trdx1]->charge() > 0. && 
+			      theTrackRefs[trdx2]->charge() > 0.) {
+		      negativeTrackRef = theTrackRefs[trdx1];
+		      positiveTrackRef = theTrackRefs[trdx2];
+		      negTransTkPtr = &theTransTracks[trdx1];
+		      posTransTkPtr = &theTransTracks[trdx2];
+	      } else continue;
+      } else if ( chargeOpt == 2 ) {
+	      if(theTrackRefs[trdx1]->charge() > 0. && 
+			      theTrackRefs[trdx2]->charge() > 0.) {
+		      negativeTrackRef = theTrackRefs[trdx2];
+		      positiveTrackRef = theTrackRefs[trdx1];
+		      negTransTkPtr = &theTransTracks[trdx2];
+		      posTransTkPtr = &theTransTracks[trdx1];
+	      } else continue;
+      } else if ( chargeOpt == 3 ) {
+	      if(theTrackRefs[trdx1]->charge() < 0. &&
+			      theTrackRefs[trdx2]->charge() < 0.) {
+		      negativeTrackRef = theTrackRefs[trdx2];
+		      positiveTrackRef = theTrackRefs[trdx1];
+		      negTransTkPtr = &theTransTracks[trdx2];
+		      posTransTkPtr = &theTransTracks[trdx1];
+	      } else continue;
+      } else if ( chargeOpt == 4 ) {
+	      if(theTrackRefs[trdx1]->charge() < 0. &&
+			      theTrackRefs[trdx2]->charge() < 0.) {
+		      negativeTrackRef = theTrackRefs[trdx1];
+		      positiveTrackRef = theTrackRefs[trdx2];
+		      negTransTkPtr = &theTransTracks[trdx1];
+		      posTransTkPtr = &theTransTracks[trdx2];
+	      } else continue;
       }
       // If they're not 2 oppositely charged tracks, loop back to the
       //  beginning and try the next pair.
-      else continue;
 
       // Fill the vector of TransientTracks to send to KVF
       transTracks.push_back(*posTransTkPtr);
@@ -269,7 +302,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //          || std::abs(cxPt.z()) > 300.) continue;
 
       // Create the vertex fitter object and vertex the tracks
-    
+
       float posCandTotalE[2]={0.0};
       float negCandTotalE[2]={0.0};
       float d0TotalE[2]={0.0};
@@ -278,7 +311,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       {
         //Creating a KinematicParticleFactory
         KinematicParticleFactoryFromTransientTrack pFactory;
-        
+
         float chi = 0.0;
         float ndf = 0.0;
 
@@ -378,7 +411,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
           TVector3 dVec;
           dVec.SetXYZ(d0TotalP.x(), d0TotalP.y(), d0TotalP.z());
           double alpha = svpvVec.Angle(dVec);
-          
+
         if( d0NormalizedChi2 > chi2Cut ||
             rVtxMag < rVtxCut ||
             rVtxMag / sigmaRvtxMag < rVtxSigCut ||

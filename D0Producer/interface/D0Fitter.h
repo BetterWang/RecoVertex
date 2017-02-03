@@ -110,6 +110,7 @@ class D0Fitter {
   double VtxChiProbCut;
   double dPtCut;
   double alphaCut;
+  int    chargeOpt;
 
   std::vector<reco::TrackBase::TrackQuality> qualities;
 };

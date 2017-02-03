@@ -1,17 +1,18 @@
 import FWCore.ParameterSet.Config as cms
 
 generalD0Candidates = cms.EDProducer("D0Producer",
-                                     
+
     # InputTag that tells which TrackCollection to use for vertexing
     trackRecoAlgorithm = cms.InputTag('generalTracks'),
     vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices'),
 
     trackQualities = cms.vstring('highPurity'),
-                                     
+
     tkChi2Cut = cms.double(9999.0), #trk Chi2 <
     tkNhitsCut = cms.int32(0), #trk Nhits >=
     tkPtCut = cms.double(0.0), #trk pT >
     tkEtaCut = cms.double(999.0), #trk abs(eta) <
+    chargeOpt = cms.int32(0), #trk charge combinations
 
     #   Track impact parameter significance >
     dauTransImpactSigCut = cms.double(0.),
