@@ -7,5 +7,5 @@ import FWCore.ParameterSet.Config as cms
 # tracker geometry
 # tracker numbering
 # ctfV0Producer
-from RecoVertex.V0Producer.generalV0Candidates_cfi import *
+from RecoVertex.D0Producer.generalD0Candidates_cfi import *
 
